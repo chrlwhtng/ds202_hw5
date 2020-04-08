@@ -14,13 +14,13 @@ This dataset https://data.iowa.gov/Sales-Distribution/2019-Iowa-Liquor-Sales/38x
   b. Click Filter -- Filter -- Go advanced now
   c. Add a New Filter Condition: City is Ames.
   d. Export -- CSV -- Download
-  e. Use `readr::read_csv` to import.
-  
-  
 ```{r}
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
+```
+  e. Use `readr::read_csv` to import.
+```{r}
 liquor <- readr::read_csv("2019_Iowa_Liquor_Sales.csv")
 ```
   
@@ -30,7 +30,7 @@ liquor <- readr::read_csv("2019_Iowa_Liquor_Sales.csv")
 liquor <- liquor %>% na.omit(cols=`Store Location`)
 liquor$`Store Location` <- substr(liquor$`Store Location`, 8, nchar(liquor$`Store Location`) - 1)
 
-liquor <- liquor %>% separate(col=`Store Location`, into=c('Latitude', 'Longitude'), sep=" ")
+liquor <- liquor %>% separate(col=`Store Location`, into=c('Longitude', 'Latitude'), sep=" ")
 ```
   b. make sure the variables are in the correct type, by converting incorrect variable types.
 ```{r}
@@ -50,7 +50,7 @@ liquor$Year <- as.numeric(unlist(liquor$Year))
 3. First overview:
   a. Plot a scatterplot of lat and long of store locations. 
 ```{r}
-liquor %>% ggplot(aes(x=Latitude, y=Longitude)) + geom_point() + 
+liquor %>% ggplot(aes(x=Longitude, y=Latitude)) + geom_point() + 
   ggtitle("Location of Ames, Iowa Liquor Stores")
 ```
 
@@ -59,23 +59,21 @@ liquor %>% ggplot(aes(x=Latitude, y=Longitude)) + geom_point() +
 #Switch to factor
 liquor$`Category Name` <- as.factor(liquor$`Category Name`)
 
-bar <- liquor %>% ggplot(aes(x=`Category Name`, count=`Volume Sold (Liters)`)) + 
+liquor %>% ggplot(aes(x=`Category Name`, count=`Volume Sold (Liters)`)) + 
   geom_bar(position=position_dodge(width = .5)) + coord_flip() + ylab('Volume Sold (Liters)') + 
-  ggtitle("Voume of Alcohol Sold in Each Category")
-
-bar <- bar + theme(axis.text.y = element_text(size=5))
-bar
+  ggtitle("Voume of Alcohol Sold in Each Category") + theme(axis.text.y = element_text(size=5))
 ```
+
 4. Find the daily sales liquor sales in Ames in 2019. Summarize the number of sales, volume of liquor sold, and amount of money spent.
 ```{r}
-liquor$Date <- paste(liquor$Year, liquor$Month, liquor$Day, sep="-") %>% ymd()
+summary(liquor$`Bottles Sold`)
+mean(liquor$`Bottles Sold`)
 
-liqSales <- liquor$`Bottles Sold`
+summary(liquor$`Volume Sold (Gallons)`)
+mean(liquor$`Volume Sold (Gallons)`)
 
-days <- liquor %>% group_by(Month, Day)
-
-
-View(days)
+summary(liquor$`Sale (Dollars)`)
+mean(liquor$`Sale (Dollars)`)
 ```
 5. Plot volume sold by day (use a scatterplot of volume by day and facet by month). Discover trends with the help of `geom_smooth`. Describe any patterns.
 ```{r}
